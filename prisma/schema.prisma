@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+//Tables for Notifications with different statuses
+
+model Notification  {
+  id          String   @id @default(cuid())
+  type        NotificationType   // e.g., "email", "in_app"
+  userId      String             // Reference to the userid in the firestore user collection
+  subject     String?
+  body        String
+  status      NotificationStatus @default(PENDING) // e.g., "pending", "sent", "failed"
+  templateId  String?    // Reference to a notification template, if applicable
+  metadata    Json?     // Additional metadata, e.g., variables for templates
+  sentAt      DateTime?  // Timestamp when the notification was sent, null if not sent
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  template    NotificationTemplate? @relation(fields: [templateId], references: [id])
+
+  @@index([userId])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  EMAIL
+  IN_APP
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model NotificationTemplate {
+  id          String   @id @default(cuid())
+  name        String   @unique         // e.g., "Welcome Email"
+  subject     String?                  // Subject line for email notifications
+  body        String?                   // Text content of the notification
+  htmlContent String?                   // HTML content of the notification
+  textContent String?
+  variables   Json?                    // JSON object defining variables that can be replaced in the body
+  createdAt   DateTime @default(now()) 
+  updatedAt   DateTime @updatedAt
+
+  notifications Notification[]
+
+  @@map("notification_templates")
+}
