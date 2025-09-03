@@ -9,7 +9,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": "./",
     "resolveJsonModule": true,
     "declaration": true,
     "declarationMap": true,
@@ -22,7 +22,11 @@
     "exactOptionalPropertyTypes": true
   },
   "include": [
-    "src/**/*"
+    "src/**/*.ts",
+    "*.ts",
+    "src",
+    "prisma/seed.mts",
+    "prisma/**/*.ts",
   ],
   "exclude": [
     "node_modules",
