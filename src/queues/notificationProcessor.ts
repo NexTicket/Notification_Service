@@ -1,14 +1,12 @@
 import { notificationQueue } from "./notificationQueue";
 import { sendEmail } from "../services/sendGridService";
+import { sendTicketPurchaseNotification } from "../services/ticketPurchaseService";
+import { sendEventAnnouncement } from "../services/eventAnnouncementService";
+import { sendEventReminder } from "../services/eventReminderService";
+import { getUserById, getUsersByEventId } from "../services/userService";
 
 notificationQueue.process(async(job) => {
-    if(job.data.type === "EMAIL") {
-        await sendEmail({
-            recipient: job.data.recipient,
-            subject: job.data.subject || "",
-            content: job.data.content || "",
-            textContent: job.data.content || "",
-            metadata: job.data.variables ?? {},
-        });
-    }
+   const {type, ...data} = job.data;
+
+   switch(type)
 })

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { cacheService } from '../config/redis';
-import { EventData , OrderData , TicketData } from '../types/index'
+import { EventData, OrderData, TicketData, UserData } from '../types/index';
 
 export class ExternalApiService {
     private evmsBaseUrl: string;
@@ -101,5 +101,12 @@ export class ExternalApiService {
             console.error(`Error fetching ticket ${ticketId}:`, error);
             return null;
         }
+    }
+
+    async getEventAttendees(eventId: string): Promise<UserData[]> {
+        // TODO: This should fetch actual attendees from the order/ticket service
+        // For now, return empty array - this needs to be implemented when order service is available
+        console.log(`Fetching attendees for event ${eventId} - placeholder implementation`);
+        return [];
     }
 };

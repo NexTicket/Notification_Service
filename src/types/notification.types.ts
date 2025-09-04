@@ -4,6 +4,11 @@ export interface SendNotificationParams {
   content: string;
   textContent?: string;
   metadata?: Record<string, any>;
+  attachments?:{
+    content: string;
+    filename: string;
+    type: string;
+  }[];
 }
 
 export interface SendResult {
@@ -41,10 +46,10 @@ export interface CreateNotificationRequest {
 }
 
 export enum NotificationType {
-  EMAIL = 'EMAIL',
-  SMS = 'SMS',
-  PUSH = 'PUSH',
-  IN_APP = 'IN_APP'
+  TICKET_PURCHASE = 'TICKET_PURCHASE',
+  EVENT_ANNOUNCEMENT = 'EVENT_ANNOUNCEMENT',
+  EVENT_REMINDER = 'EVENT_REMINDER',
+  GENERAL_EMAIL = 'GENERAL_EMAIL'
 }
 
 export enum NotificationStatus {
