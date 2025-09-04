@@ -193,3 +193,6 @@ generated/
 .redisinsight/
 
 /src/generated/prisma
+.env
+.env.local
+.env.*
