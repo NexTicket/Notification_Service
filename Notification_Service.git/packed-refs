@@ -1,0 +1,5 @@
+# pack-refs with: peeled fully-peeled sorted 
+c125794c72229681d9c39bf76be41594de73c594 refs/heads/Mindi
+930e5418a79480b62d65876c4b79b2f26bcbbb9e refs/heads/main
+5a9f31ed5954e78b65368f8458c58ea9309af0b8 refs/pull/1/head
+c125794c72229681d9c39bf76be41594de73c594 refs/pull/2/head
