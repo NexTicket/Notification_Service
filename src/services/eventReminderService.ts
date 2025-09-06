@@ -12,8 +12,8 @@ export async function sendEventReminder(eventId:string, daysBefore: number=1) {
             throw new Error('Event not found');
         }
 
-        //Fetch Attendees
-        const attendees = await externalApi.getUserDetails(eventId);
+                //Fetch Attendees
+        const attendees = await externalApi.getEventAttendees(eventId);
 
         const reminderDate = new Date(eventData.date);
         reminderDate.setDate(reminderDate.getDate()-daysBefore);
@@ -34,7 +34,7 @@ export async function sendEventReminder(eventId:string, daysBefore: number=1) {
             <p>Best regards,<br>NexTicket Team</p>
         `;
 
-        const emailPromises = attendees.map(attendee => 
+        const emailPromises = attendees.map((attendee: any) => 
             sendEmail({
                 recipient: attendee.email,
                 subject: `Reminder: ${eventData.title} - ${daysBefore} day${daysBefore > 1 ? 's' : ''} to go!`,

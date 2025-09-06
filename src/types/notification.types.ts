@@ -43,6 +43,13 @@ export interface CreateNotificationRequest {
   content?: string;
   priority?: 'low' | 'normal' | 'high';
   scheduledAt?: Date;
+  // Additional fields for specific notification types
+  orderId?: string;
+  userId?: string;
+  eventId?: string;
+  ticketDetails?: any;
+  daysBefore?: number;
+  customMessage?: string;
 }
 
 export enum NotificationType {

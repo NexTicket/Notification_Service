@@ -30,8 +30,12 @@ export const cacheService =  {
     //GET function from redis
     async get (key: string){
         try {
+            if (!redisClient.isOpen) {
+                console.log('Redis not connected, skipping cache get');
+                return null;
+            }
             const value = await redisClient.get(key);
-            return value ? JSON.parse(value) : null; //converts the string stroed in redis to JSON object
+            return value ? JSON.parse(value) : null; //converts the string stored in redis to JSON object
         } catch(error){
             console.error('Cache got error: ',error);
             return null;
@@ -41,6 +45,10 @@ export const cacheService =  {
     //SET function 
     async set (key:string, value:any , ttlSeconds:number = 3600) {
         try{   
+            if (!redisClient.isOpen) {
+                console.log('Redis not connected, skipping cache set');
+                return;
+            }
             await redisClient.setEx(key, ttlSeconds, JSON.stringify(value));
 
         }catch(error){
@@ -51,6 +59,10 @@ export const cacheService =  {
     //DELETE function
     async del(key:string){
         try{
+            if (!redisClient.isOpen) {
+                console.log('Redis not connected, skipping cache delete');
+                return;
+            }
             await redisClient.del(key);
         }catch(error){
             console.error('Cache delete error: ', error);
@@ -59,6 +71,10 @@ export const cacheService =  {
 
     async exists(key:string): Promise<boolean> {
         try{
+            if (!redisClient.isOpen) {
+                console.log('Redis not connected, skipping cache exists');
+                return false;
+            }
             const result = await redisClient.exists(key);
             return result === 1;
         }catch(error){

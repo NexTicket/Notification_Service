@@ -30,7 +30,14 @@ export async function sendEventAnnouncement(eventId:string, customMessage?:strin
             <p>Best regards,<br>NexTicket Team</p>
         `;
 
-        const Promise.all(emailPromises);
+        const emailPromises = attendees.map(attendee => 
+            sendEmail({
+                recipient: attendee.email,
+                subject: `Announcement on : ${eventData.title}`,
+                content: emailContent
+            })
+        );
+        await Promise.all(emailPromises);
         return { success: true, sentTo: attendees.length};
 
     }catch(error){

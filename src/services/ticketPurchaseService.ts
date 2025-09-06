@@ -1,21 +1,20 @@
 import { sendEmail } from "./sendGridService";
 import { TicketPurchaseData } from "../types/index";
 import { ExternalApiService } from "./externalAPIService";
-import { error } from "console";
 
-const externalApi = new ExternalApiService();
+export const externalApi = new ExternalApiService();
 
-export async function sendTicketPurchaseNotification(data:TicketPurchaseData){
-    try{
-        //Fetch order data for the email
+export async function sendTicketPurchaseNotification(data: TicketPurchaseData) {
+    try {
+        // Fetch order data for the email
         const eventData = await externalApi.getEventDetails(data.eventId);
         const orderData = await externalApi.getOrderDetails(data.orderId);
 
-        if(!eventData||!orderData){
+        if (!eventData || !orderData) {
             throw new Error('Failed to fetch event or order details');
         }
 
-        //Generate QR code
+        // Generate QR code
         const qrCodeBase64 = await generateQRCode(data.orderId);
 
         const emailContent = `
@@ -34,30 +33,32 @@ export async function sendTicketPurchaseNotification(data:TicketPurchaseData){
         `;
 
         await sendEmail({
-            recipient: data.userId, //Assuming userId is email, or fetch from User Service
+            recipient: data.userId, // Assuming userId is email, or fetch from User Service
             subject: `Your Tickets for ${eventData.title}`,
             content: emailContent,
             attachments: [{
                 content: qrCodeBase64,
                 filename: 'ticket_qr.png',
                 type: 'image/png'
-        }]
+            }]
         });
-        return {success: true};
-} catch(error){
-    console.log('Error sending ticket purchase notification: ',error);
-    return {
-        succcess: false,
-        error: typeof error === "object" && error !== null && "message" in error
-            ? (error as { message: string }).message
-            : String(error)
-    };
-}
+        return { success: true };
+    } catch (error) {
+        console.log('Error sending ticket purchase notification: ', error);
+        return {
+            success: false,
+            error: typeof error === "object" && error !== null && "message" in error
+                ? (error as { message: string }).message
+                : String(error)
+        };
+    }
 }
 
-//Need to implement QR code generation
+// Need to implement QR code generation
 async function generateQRCode(orderId: string): Promise<string> {
-    // Use a library like 'qrcode' to generate QR code
-    // For now, return a placeholder
-    return 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='; // 1x1 transparent PNG
+    const QRCode = await import('qrcode');
+    const qrCodeDataURL = await QRCode.toDataURL(orderId);
+    // Extract base64 from data URL
+    const base64 = qrCodeDataURL.split(',')[1] ?? "";
+    return base64;
 }

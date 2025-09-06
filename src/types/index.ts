@@ -33,6 +33,7 @@ export interface EventData {
   venue: string;
   organizer: string;
   imageUrl?: string;
+  startTime?: string;
 }
 
 export interface OrderData {
@@ -69,4 +70,13 @@ export interface EmailTemplateData {
   venue: string;
   orderDetails: OrderData;
   ticketDetails: TicketData[];
+}
+
+export interface CreateNotificationRequest {
+    type: string;
+    orderId?: string;
+    userId?: string;
+    eventId?: string;
+    ticketDetails?: any;
+    customMessage?: string;
 }

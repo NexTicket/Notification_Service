@@ -7,6 +7,7 @@ export const mockEvents: EventData[] = [
         description: 'A fantastic outdoor music event',
         date: '2025-09-15T18:00:00Z',
         venue: 'Central Park',
+        startTime: '18:00',
         organizer: 'Music Co',
         imageUrl: 'https://example.com/image.jpg'
     }
