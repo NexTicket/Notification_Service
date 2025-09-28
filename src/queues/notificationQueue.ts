@@ -1,8 +1,10 @@
 import Bull from "bull";
 import { CreateNotificationRequest } from "../types/notification.types";
-import { redisClient } from "../config/redis";
 
-export const notificationQueue = new Bull<CreateNotificationRequest>(
+// Payload used inside our Bull queue, with DB notification id
+export type NotificationJobPayload = CreateNotificationRequest & { notificationId: string };
+
+export const notificationQueue = new Bull<NotificationJobPayload>(
     "notification-queue",
     process.env.REDIS_URL || "redis://localhost:6379"
 );

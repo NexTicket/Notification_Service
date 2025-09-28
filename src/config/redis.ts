@@ -16,13 +16,19 @@ redisClient.on('reconnecting',()=>{
     console.log('Reconnecting to Redis .. ');
 })
 
-export { redisClient };
-
-export const connectRedis = async() => {
-    if(!redisClient.isOpen){
-        await redisClient.connect();
+export const connectRedis = async () => {
+    try {
+        if (!redisClient.isOpen) {
+            await redisClient.connect();
+        }
+        console.log('Connected to Redis');
+    } catch (error) {
+        console.error('Redis connection failed:', error);
+        throw error;
     }
 };
+
+export { redisClient };
 
 //cache utility functions
 

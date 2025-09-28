@@ -3,7 +3,7 @@ export interface NotificationPayload {
   type: 'EMAIL' | 'IN_APP';
   subject?: string;
   body: string;
-  templateId?: string;
+  //templateId?: string;
   metadata?: Record<string, any>;
 }
 
@@ -72,11 +72,13 @@ export interface EmailTemplateData {
   ticketDetails: TicketData[];
 }
 
-export interface CreateNotificationRequest {
-    type: string;
-    orderId?: string;
-    userId?: string;
-    eventId?: string;
-    ticketDetails?: any;
-    customMessage?: string;
-}
+// Re-export canonical notification types to avoid duplication
+export {
+  SendNotificationParams,
+  SendResult,
+  INotificationService,
+  NotificationTemplate,
+  CreateNotificationRequest,
+  NotificationType,
+  NotificationStatus,
+} from './notification.types';
