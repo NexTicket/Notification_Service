@@ -32,7 +32,7 @@ export async function sendTicketPurchaseNotification(data: TicketPurchaseData) {
         <p>Best regards,<br>NexTicket Team</p>
         `;
 
-        await sendEmail({
+        const emailResult = await sendEmail({
             recipient: data.userId, // Assuming userId is email, or fetch from User Service
             subject: `Your Tickets for ${eventData.title}`,
             content: emailContent,
@@ -42,6 +42,11 @@ export async function sendTicketPurchaseNotification(data: TicketPurchaseData) {
                 type: 'image/png'
             }]
         });
+        
+        if (!emailResult.success) {
+            throw new Error(`Email sending failed: ${emailResult.error}`);
+        }
+        
         return { success: true };
     } catch (error) {
         console.log('Error sending ticket purchase notification: ', error);

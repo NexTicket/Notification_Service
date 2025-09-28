@@ -32,13 +32,23 @@ export async function sendEmail(params: SendNotificationParams) : Promise<SendRe
                 disposition: 'attachment'
             }));
         }
+        console.log('📧 SendGrid sending email:', {
+            to: msg.to,
+            from: msg.from,
+            subject: msg.subject
+        });
+        
         const [response] = await sgMail.send(msg);
+        console.log('✅ SendGrid success:', response.statusCode, response.headers['x-message-id']);
+        
         return {
             success: true,
             messageId: response.headers['x-message-id'] || undefined,
             provider: "Sendgrid",
         };
     } catch(error: any) {
+        console.error('❌ SendGrid error:', error.message);
+        console.error('❌ SendGrid error details:', error.response?.body);
         return {
             success: false,
             error: error.message,
