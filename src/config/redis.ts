@@ -1,7 +1,7 @@
 import Redis from 'redis';
 
 const redisClient = Redis.createClient({
-    url: process.env.REDIS_URL || 'redis://localhost:6379',
+    url: process.env.REDIS_URL || 'redis://localhost:6380',
 });
 
 redisClient.on('error',(err)=>{
