@@ -1,57 +1,64 @@
-export interface SendNotificationParams {
-  recipient: string;
-  subject?: string;
-  content: string;
-  textContent?: string;
-  metadata?: Record<string, any>;
+// Types for the new notification architecture
+
+export interface NotificationData {
+    eventName: string;
+    venueName: string;
+    venueAddress?: string;
+    eventDate: string;
+    ticketId: string;
+    orderId: string;
+    seatNumber?: string;
+    userName?: string;
+    [key: string]: any; // Allow additional dynamic template data
 }
 
-export interface SendResult {
-  success: boolean;
-  messageId?: string;
-  error?: string;
-  provider: string;
+export interface UserData {
+    firebaseUid: string;
+    email: string;
+    displayName?: string;
 }
 
-export interface INotificationService {
-  send(params: SendNotificationParams): Promise<SendResult>;
-  sendBulk(notifications: SendNotificationParams[]): Promise<SendResult[]>;
+export interface EventData {
+    eventId: string;
+    eventName: string;
+    eventDate: string;
+    venueId: string;
+    venueName: string;
+    venueAddress?: string;
+    organizerName?: string;
+    [key: string]: any;
 }
 
-export interface NotificationTemplate {
-  id: string;
-  name: string;
-  type: NotificationType;
-  subject?: string;
-  htmlContent: string;
-  textContent?: string;
-  variables?: string[];
-  isActive: boolean;
-}
-
-export interface CreateNotificationRequest {
-  type: NotificationType;
-  recipient: string;
-  templateName?: string;
-  variables?: Record<string, any>;
-  subject?: string;
-  content?: string;
-  priority?: 'low' | 'normal' | 'high';
-  scheduledAt?: Date;
-}
-
-export enum NotificationType {
-  EMAIL = 'EMAIL',
-  SMS = 'SMS',
-  PUSH = 'PUSH',
-  IN_APP = 'IN_APP'
+export interface ProcessNotificationParams {
+    messageId: string;
+    firebaseUid: string;
+    qrData: string;
+    ticketId: string;
+    orderId: string;
+    eventId: string;
+    venueId: string;
+    timestamp: string;
 }
 
 export enum NotificationStatus {
-  PENDING = 'PENDING',
-  SENT = 'SENT',
-  FAILED = 'FAILED',
-  DELIVERED = 'DELIVERED',
-  BOUNCED = 'BOUNCED',
-  CLICKED = 'CLICKED'
+    PENDING = 'PENDING',
+    SENT = 'SENT',
+    FAILED = 'FAILED',
+    RETRYING = 'RETRYING',
 }
+
+export const MAX_RETRY_ATTEMPTS = 3;
+export const DLQ_TOPIC = 'notifications_dlq';
+
+// SendGrid specific types
+export interface SendGridTemplateData {
+    eventName: string;
+    venueName: string;
+    eventDate: string;
+    qrCodeUrl: string;
+    userName: string;
+    ticketId: string;
+    orderId: string;
+    [key: string]: any;
+}
+

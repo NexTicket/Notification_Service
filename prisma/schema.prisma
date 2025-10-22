@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -9,50 +8,31 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-//Tables for Notifications with different statuses
+// Stores a log of every notification sent or attempted
+model Notification {
+  id               String   @id @default(uuid())
+  firebaseUid      String   // The user's Firebase ID from the Kafka message
+  recipientEmail   String   // The user's email, fetched from the User service
+  status           Status   @default(PENDING) // The current status of the notification
+  provider         String   @default("SENDGRID") // The service used to send (e.g., SENDGRID, FIREBASE_PUSH)
+  qrCodeUrl        String?  // Public URL of the QR image in Google Cloud Storage
+  qrDataString     String   // The original data string for the QR code from Kafka
+  notificationData Json?    // A JSON snapshot of all data used in the email (event name, venue, etc.)
+  failureReason    String?  // If the status is FAILED, this stores the error
+  retryCount       Int      @default(0) // Number of retry attempts
+  messageId        String   @unique // Unique message ID from Kafka for idempotency
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-model Notification  {
-  id          String   @id @default(cuid())
-  type        NotificationType   // e.g., "email", "in_app"
-  userId      String             // Reference to the userid in the firestore user collection
-  subject     String?
-  body        String
-  status      NotificationStatus @default(PENDING) // e.g., "pending", "sent", "failed"
-  templateId  String?    // Reference to a notification template, if applicable
-  metadata    Json?     // Additional metadata, e.g., variables for templates
-  sentAt      DateTime?  // Timestamp when the notification was sent, null if not sent
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  template    NotificationTemplate? @relation(fields: [templateId], references: [id])
-
-  @@index([userId])
+  @@index([firebaseUid])
+  @@index([status])
+  @@index([messageId])
   @@map("notifications")
 }
 
-enum NotificationType {
-  EMAIL
-  IN_APP
-}
-
-enum NotificationStatus {
-  PENDING
-  SENT
-  FAILED
-}
-
-model NotificationTemplate {
-  id          String   @id @default(cuid())
-  name        String   @unique         // e.g., "Welcome Email"
-  subject     String?                  // Subject line for email notifications
-  body        String?                   // Text content of the notification
-  htmlContent String?                   // HTML content of the notification
-  textContent String?
-  variables   Json?                    // JSON object defining variables that can be replaced in the body
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  notifications Notification[]
-
-  @@map("notification_templates")
+enum Status {
+  PENDING   // Just received, not yet processed
+  SENT      // Sent successfully
+  FAILED    // A permanent failure occurred
+  RETRYING  // A temporary failure, will try again
 }

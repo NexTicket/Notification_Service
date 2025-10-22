@@ -76,18 +76,16 @@ export interface PaymentFailedEvent {
     timestamp: string;
 }
 
-// Ticket Service Events
+// Ticket Service Events - The main notification trigger
 export interface TicketGeneratedEvent {
     eventType: KafkaEventType.TICKET_GENERATED;
+    messageId: string;          // Unique message ID for idempotency
     ticketId: string;
     orderId: string;
-    userId: string;
+    firebaseUid: string;        // User's Firebase UID (not email)
     eventId: string;
-    eventTitle: string;
-    eventDate: string;
-    venue: string;
-    seatNumber?: string;
-    qrCode: string;
+    venueId: string;
+    qrData: string;             // QR code data string (not the image)
     timestamp: string;
 }
 
