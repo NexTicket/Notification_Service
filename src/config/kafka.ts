@@ -27,7 +27,7 @@ export const getKafkaConsumer = (): Consumer => {
 export const getKafkaProducer = (): Producer => {
     if (!producer) {
         producer = kafka.producer({
-            allowAutoTopicCreation: true,
+            allowAutoTopicCreation: false,
             transactionTimeout: 30000,
         });
     }

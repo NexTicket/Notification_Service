@@ -80,7 +80,7 @@ export async function processTicketNotification(params: ProcessNotificationParam
             console.log(`Event data retrieved from Redis cache: ${eventId}`);
         } else {
             // Cache miss - fetch from Event-Venue Service
-            eventData = await getEventAndVenueData(eventId, venueId);
+            eventData = await getEventAndVenueData(eventId);
             
             // Save to Redis (cache for 1 hour)
             await redisClient.set(cacheKey, JSON.stringify(eventData), { EX: 3600 });
