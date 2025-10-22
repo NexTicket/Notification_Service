@@ -46,17 +46,21 @@ class KafkaConsumerService {
             }
 
             const event: TicketGeneratedEvent = JSON.parse(message.value.toString());
-            console.log(`Received event from ${topic}: ${event.eventType}`);
+            console.log(`\n📨 Received event from ${topic}:`);
+            console.log(`   Event Type: ${event.eventType}`);
+            console.log(`   Message ID: ${event.messageId}`);
+            console.log(`   Ticket ID: ${event.ticketId}`);
+            console.log(`   Firebase UID: ${event.firebaseUid}`);
 
             // Validate event type
             if (event.eventType !== KafkaEventType.TICKET_GENERATED) {
-                console.warn(`Unexpected event type: ${event.eventType}. Skipping...`);
+                console.warn(`⚠️  Unexpected event type: ${event.eventType}. Skipping...`);
                 return;
             }
 
             // Validate required fields
             if (!event.messageId || !event.firebaseUid || !event.qrData) {
-                console.error(`Invalid event: missing required fields`, event);
+                console.error(`❌ Invalid event: missing required fields`, event);
                 return;
             }
 
@@ -72,9 +76,13 @@ class KafkaConsumerService {
                 timestamp: event.timestamp,
             };
 
+            console.log(`🔄 Processing notification for message: ${event.messageId}...`);
             await processTicketNotification(params);
+            console.log(`✅ Successfully processed notification: ${event.messageId}\n`);
         } catch (error) {
-            console.error(`Error processing message from ${topic} (Offset: ${message.offset}):`, error);
+            console.error(`\n❌ Error processing message from ${topic} (Partition: ${partition}, Offset: ${message.offset}):`);
+            console.error(error);
+            console.error('');
             // Re-throw to let Kafka consumer handle retry logic
             throw error;
         }

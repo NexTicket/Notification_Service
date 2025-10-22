@@ -86,7 +86,7 @@ export interface TicketGeneratedEvent {
     eventId: string;
     venueId: string;
     qrData: string;             // QR code data string (not the image)
-    timestamp: string;
+    timestamp: number | string; // Can be Unix timestamp (number) or ISO string
 }
 
 // User Service Events

@@ -37,7 +37,7 @@ export interface ProcessNotificationParams {
     orderId: string;
     eventId: string;
     venueId: string;
-    timestamp: string;
+    timestamp: string | number; // Can be Unix timestamp (number) or ISO string
 }
 
 export enum NotificationStatus {

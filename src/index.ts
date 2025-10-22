@@ -3,10 +3,14 @@ import dotenv from 'dotenv';
 // IMPORTANT: Load environment variables FIRST before any other imports
 dotenv.config();
 
+// Register compression codecs BEFORE Kafka initialization
+import './config/compression.js';
+
 import express from 'express';
 import healthRoutes from './routes/health.routes.js';
 import { connectRedis } from './config/redis.js';
 import { connectKafka } from './config/kafka.js';
+import { connectDatabase } from './config/database.js';
 import { kafkaConsumerService } from './services/kafkaConsumer.js';
 
 const app = express();
@@ -20,6 +24,10 @@ console.log('Starting Notification Service...');
 // Initialize all services
 async function startServices() {
     try {
+        // Connect to Database (PostgreSQL via Prisma)
+        await connectDatabase();
+        console.log('Connected to Database');
+
         // Connect to Redis (for caching event/venue data)
         await connectRedis();
         console.log('Connected to Redis');
