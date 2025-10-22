@@ -24,6 +24,11 @@ export async function sendTicketNotification(
             throw new Error('SENDGRID_TEMPLATE_ID is not configured');
         }
 
+    console.log(`Preparing SendGrid email...`);
+    console.log(`   To: ${recipientEmail}`);
+    console.log(`   Template ID: ${templateId}`);
+    console.log(`   Event: ${templateData.eventName}`);
+
         const msg = {
             to: recipientEmail,
             from: process.env.SENDGRID_FROM_EMAIL!,
@@ -31,16 +36,18 @@ export async function sendTicketNotification(
             dynamicTemplateData: templateData, // Pass template data
         };
 
+    console.log(`Sending email via SendGrid...`);
         const [response] = await sgMail.send(msg);
         
-        console.log(`Email sent to ${recipientEmail} via SendGrid template ${templateId}`);
+    console.log(`Email sent to ${recipientEmail} via SendGrid template ${templateId}`);
+    console.log(`   SendGrid Message ID: ${response.headers['x-message-id']}`);
         
         return {
             success: true,
             messageId: response.headers['x-message-id'] || undefined,
         };
     } catch (error: any) {
-        console.error('SendGrid error:', error.response?.body || error.message);
+    console.error('SendGrid error:', error.response?.body || error.message);
         return {
             success: false,
             error: error.response?.body?.errors?.[0]?.message || error.message,

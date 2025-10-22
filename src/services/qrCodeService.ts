@@ -9,6 +9,8 @@ import { uploadQRCodeToGCS } from '../config/gcs.js';
  */
 export const generateAndUploadQRCode = async (qrDataString: string): Promise<string> => {
     try {
+        console.log(`Generating QR code from data string (length: ${qrDataString.length})`);
+        
         // Generate QR code as a buffer (PNG image)
         const qrBuffer = await QRCode.toBuffer(qrDataString, {
             type: 'png',
@@ -21,15 +23,19 @@ export const generateAndUploadQRCode = async (qrDataString: string): Promise<str
             },
         });
 
+    console.log(`QR code buffer generated (size: ${qrBuffer.length} bytes)`);
+
         // Generate a unique filename
         const filename = `qrcodes/${randomUUID()}.png`;
+    console.log(`Uploading to GCS as: ${filename}`);
 
         // Upload to Google Cloud Storage
         const publicUrl = await uploadQRCodeToGCS(qrBuffer, filename);
 
+    console.log(`QR code uploaded successfully: ${publicUrl}`);
         return publicUrl;
     } catch (error) {
-        console.error('Error generating and uploading QR code:', error);
+        console.error('❌ Error generating and uploading QR code:', error);
         throw new Error(`QR code generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 };

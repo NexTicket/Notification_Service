@@ -70,6 +70,7 @@ export async function processTicketNotification(params: ProcessNotificationParam
         });
 
         // STEP 4: Fetch event and venue data (with Redis caching)
+    console.log(`STEP 4: Fetching event and venue data for eventId: ${eventId}`);
         const cacheKey = `event:${eventId}:venue:${venueId}`;
         let eventData: EventData;
 
@@ -80,6 +81,7 @@ export async function processTicketNotification(params: ProcessNotificationParam
             console.log(`Event data retrieved from Redis cache: ${eventId}`);
         } else {
             // Cache miss - fetch from Event-Venue Service
+            console.log(`Cache miss - fetching from Event Management Service...`);
             eventData = await getEventAndVenueData(eventId);
             
             // Save to Redis (cache for 1 hour)
@@ -91,18 +93,22 @@ export async function processTicketNotification(params: ProcessNotificationParam
         if (!eventData) {
             throw new Error(`Failed to retrieve event data for eventId: ${eventId}, venueId: ${venueId}`);
         }
+    console.log(`Event data validated: ${eventData.eventName} at ${eventData.venueName}`);
 
         // STEP 5: Generate QR code and upload to GCS
-        const qrCodeUrl = await generateAndUploadQRCode(qrData);
-        console.log(`QR code generated and uploaded: ${qrCodeUrl}`);
+    console.log(`STEP 5: Generating QR code for ticket: ${ticketId}`);
+    const qrCodeUrl = await generateAndUploadQRCode(qrData);
+    console.log(`QR code generated and uploaded: ${qrCodeUrl}`);
 
         // Update notification with QR code URL
         await prisma.notification.update({
             where: { id: notificationId },
             data: { qrCodeUrl },
         });
+    console.log(`Database updated with QR code URL`);
 
         // STEP 6: Prepare template data and send email via SendGrid
+    console.log(`STEP 6: Preparing email template data...`);
         const templateData: SendGridTemplateData = {
             eventName: eventData.eventName,
             venueName: eventData.venueName,
@@ -121,10 +127,12 @@ export async function processTicketNotification(params: ProcessNotificationParam
             venueAddress: eventData.venueAddress || '',
         };
 
-        const sendResult = await sendTicketNotification(recipientEmail, templateData);
+    console.log(`Sending email to ${recipientEmail}...`);
+    const sendResult = await sendTicketNotification(recipientEmail, templateData);
 
         if (sendResult.success) {
             // STEP 7: Update status to SENT
+            console.log(`Email sent successfully! Updating database...`);
             await prisma.notification.update({
                 where: { id: notificationId },
                 data: {

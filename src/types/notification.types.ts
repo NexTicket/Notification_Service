@@ -19,10 +19,10 @@ export interface UserData {
 }
 
 export interface EventData {
-    eventId: string;
+    eventId: number;
     eventName: string;
     eventDate: string;
-    venueId: string;
+    venueId: number;
     venueName: string;
     venueAddress?: string;
     organizerName?: string;

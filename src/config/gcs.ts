@@ -25,6 +25,7 @@ export const uploadQRCodeToGCS = async (
     filename: string
 ): Promise<string> => {
     try {
+        console.log(`Uploading to GCS bucket: ${bucketName}`);
         const file = bucket.file(filename);
 
         await file.save(buffer, {
@@ -35,7 +36,12 @@ export const uploadQRCodeToGCS = async (
         });
 
         console.log(`QR code uploaded to GCS: ${filename}`);
-        return filename; // Return the filename for Signed URL generation
+        
+        // Generate a signed URL that expires in 7 days
+        console.log(`Generating signed URL...`);
+        const signedUrl = await generateSignedUrl(filename, 7 * 24 * 60 * 60);
+        console.log(`Signed URL generated successfully`);
+        return signedUrl;
     } catch (error) {
         console.error('Error uploading QR code to GCS:', error);
         throw new Error(`Failed to upload QR code: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -53,7 +59,7 @@ export const generateSignedUrl = async (
             expires: Date.now() + expiration * 1000, // Convert expiration to milliseconds
         });
 
-        console.log(`Signed URL generated: ${url}`);
+        console.log(`Signed URL generated (expires in ${expiration / 86400} days)`);
         return url;
     } catch (error) {
         console.error('Error generating Signed URL:', error);

@@ -6,12 +6,14 @@ const eventServiceUrl = process.env.EVENT_SERVICE_URL || 'http://localhost:4000'
 
 export async function getEventAndVenueData(eventId: string): Promise<EventData> {
     try {
-        console.log(`Fetching event ${eventId} from Event Management Service...`);
+        console.log(`Fetching event ${eventId} from Event Management Service at ${eventServiceUrl}...`);
         
-        const response = await axios.get(`${eventServiceUrl}/events/${eventId}`, {
+        const response = await axios.get(`${eventServiceUrl}/api/events/${eventId}`, {
             timeout: 5000,
             headers: { 'Content-Type': 'application/json' },
         });
+
+    console.log(`Received response from Event Management Service (status: ${response.status})`);
 
         const responseData = response.data as any;
 
@@ -33,7 +35,7 @@ export async function getEventAndVenueData(eventId: string): Promise<EventData> 
             throw new Error('Invalid event data: missing required fields');
         }
 
-        return {
+        const eventData = {
             eventId: data.id.toString(),
             eventName: data.title,
             eventDate: data.startDate,
@@ -42,6 +44,9 @@ export async function getEventAndVenueData(eventId: string): Promise<EventData> 
             venueAddress: data.venue.location || '',
             organizerName: data.Tenant?.name,
         };
+
+    console.log(`Successfully parsed event data: ${eventData.eventName}`);
+        return eventData;
     } catch (error: any) {
         // Handle Axios-specific errors
         if (error.response) {
