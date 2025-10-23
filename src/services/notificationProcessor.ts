@@ -70,12 +70,31 @@ export async function processTicketNotification(params: ProcessNotificationParam
         });
 
         // STEP 4: Fetch event and venue data (with Redis caching)
-    console.log(`STEP 4: Fetching event and venue data for eventId: ${eventId}`);
+        console.log(`STEP 4: Fetching event and venue data for eventId: ${eventId}`);
         const cacheKey = `event:${eventId}:venue:${venueId}`;
         let eventData: EventData;
 
-        // Try Redis cache first
-        const cachedData = await redisClient.get(cacheKey);
+        // Try Redis cache first with timeout
+        let cachedData: string | null = null;
+        try {
+            console.log(`Checking Redis cache for key: ${cacheKey}`);
+            
+            // Add timeout to Redis operation (5 seconds)
+            const redisTimeout = new Promise<null>((_, reject) => {
+                setTimeout(() => reject(new Error('Redis timeout after 5 seconds')), 5000);
+            });
+            
+            cachedData = await Promise.race([
+                redisClient.get(cacheKey),
+                redisTimeout
+            ]) as string | null;
+            
+            console.log(`Redis cache result: ${cachedData ? 'HIT' : 'MISS'}`);
+        } catch (error: any) {
+            console.error(`Redis cache check failed: ${error.message}. Continuing without cache...`);
+            cachedData = null;
+        }
+
         if (cachedData) {
             eventData = JSON.parse(cachedData);
             console.log(`Event data retrieved from Redis cache: ${eventId}`);
@@ -84,9 +103,25 @@ export async function processTicketNotification(params: ProcessNotificationParam
             console.log(`Cache miss - fetching from Event Management Service...`);
             eventData = await getEventAndVenueData(eventId);
             
-            // Save to Redis (cache for 1 hour)
-            await redisClient.set(cacheKey, JSON.stringify(eventData), { EX: 3600 });
-            console.log(`Event data fetched and cached: ${eventId}`);
+            // Save to Redis (cache for 1 hour) - don't fail if this errors
+            try {
+                console.log(`Caching event data to Redis...`);
+                
+                // Add timeout to Redis SET operation (5 seconds)
+                const redisSetTimeout = new Promise<void>((_, reject) => {
+                    setTimeout(() => reject(new Error('Redis SET timeout after 5 seconds')), 5000);
+                });
+                
+                await Promise.race([
+                    redisClient.set(cacheKey, JSON.stringify(eventData), { EX: 3600 }),
+                    redisSetTimeout
+                ]);
+                
+                console.log(`Event data fetched and cached: ${eventId}`);
+            } catch (error: any) {
+                console.error(`Failed to cache event data in Redis: ${error.message}`);
+                console.log(`Event data fetched (not cached): ${eventId}`);
+            }
         }
 
         // Validate that event data was successfully retrieved
