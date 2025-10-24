@@ -64,6 +64,41 @@ export const disconnectKafka = async (): Promise<void> => {
     }
 };
 
+export const createTopicIfNotExists = async (topicName: string): Promise<void> => {
+    const admin = kafka.admin();
+    try {
+        await admin.connect();
+        console.log('Kafka Admin connected');
+
+        // Check if topic exists
+        const topics = await admin.listTopics();
+        
+        if (topics.includes(topicName)) {
+            console.log(`Topic '${topicName}' already exists`);
+            return;
+        }
+
+        // Create topic with 1 partition and replication factor 1
+        await admin.createTopics({
+            topics: [
+                {
+                    topic: topicName,
+                    numPartitions: 1,
+                    replicationFactor: 1,
+                },
+            ],
+        });
+
+        console.log(`✓ Created Kafka topic: '${topicName}' (partitions: 1, replication-factor: 1)`);
+    } catch (error) {
+        console.error(`Error creating topic '${topicName}':`, error);
+        throw error;
+    } finally {
+        await admin.disconnect();
+        console.log('Kafka Admin disconnected');
+    }
+};
+
 // Graceful shutdown
 process.on('SIGINT', async () => {
     await disconnectKafka();

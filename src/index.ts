@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 // IMPORTANT: Load environment variables FIRST before any other imports
 dotenv.config();
 
-// Register compression codecs BEFORE Kafka initialization
+// Import compression configuration (GZIP for Kafka)
 import './config/compression.js';
 
 import express from 'express';

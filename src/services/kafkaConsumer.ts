@@ -1,5 +1,5 @@
 import { EachMessagePayload } from 'kafkajs';
-import { getKafkaConsumer } from '../config/kafka.js';
+import { getKafkaConsumer, createTopicIfNotExists } from '../config/kafka.js';
 import { TicketGeneratedEvent, KafkaEventType } from '../types/kafka.types.js';
 import { processTicketNotification } from './notificationProcessor.js';
 import { ProcessNotificationParams } from '../types/notification.types.js';
@@ -11,9 +11,13 @@ class KafkaConsumerService {
         try {
             const consumer = getKafkaConsumer();
 
-            // Subscribe to the ticket notifications topic
+            // Create topics if they don't exist, then subscribe
             for (const topic of this.topics) {
                 try {
+                    // Try to create the topic if it doesn't exist
+                    await createTopicIfNotExists(topic);
+                    
+                    // Subscribe to the topic
                     await consumer.subscribe({ topic, fromBeginning: true });
                     console.log(`Subscribed to Kafka topic: ${topic}`);
                 } catch (error) {

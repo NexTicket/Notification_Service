@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch --env-file=.env src/index.ts",
-    "start": "node dist/index.js",
+    "start": "node dist/src/index.js",
     "build": "tsc",
     "kafka:create-topics": "bash scripts/create-kafka-topics.sh"
   },
@@ -22,16 +22,14 @@
     "express": "^5.1.0",
     "firebase-admin": "^13.5.0",
     "kafkajs": "^2.2.4",
-    "kafkajs-snappy": "^1.1.0",
     "qrcode": "^1.5.4",
     "redis": "^5.8.2",
-    "snappy": "^7.3.3"
+    "dotenv": "^17.2.2"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",
     "@types/node": "^24.3.0",
     "@types/qrcode": "^1.5.5",
-    "dotenv": "^17.2.2",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2"
