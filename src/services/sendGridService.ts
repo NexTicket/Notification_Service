@@ -1,28 +1,59 @@
-import sgMail from "../config/sendgrid";
-import { SendNotificationParams, SendResult } from "../types/notification.types";
+import sgMail from '../config/sendgrid.js';
+import { SendGridTemplateData } from '../types/notification.types.js';
 
-export async function sendEmail(params: SendNotificationParams) : Promise<SendResult> {
+export interface SendEmailResult {
+    success: boolean;
+    messageId?: string;
+    error?: string;
+}
+
+/**
+ * Send email using SendGrid Dynamic Template
+ * @param recipientEmail - The user's email address
+ * @param templateData - The dynamic data for the template
+ * @returns SendEmailResult with success status
+ */
+export async function sendTicketNotification(
+    recipientEmail: string,
+    templateData: SendGridTemplateData
+): Promise<SendEmailResult> {
     try {
+        const templateId = process.env.SENDGRID_TEMPLATE_ID;
+        
+        if (!templateId) {
+            throw new Error('SENDGRID_TEMPLATE_ID is not configured');
+        }
+
+    console.log(`Preparing SendGrid email...`);
+    console.log(`   To: ${recipientEmail}`);
+    console.log(`   Template ID: ${templateId}`);
+    console.log(`   Event: ${templateData.eventName}`);
+
         const msg = {
-            to: params.recipient,
+            to: recipientEmail,
             from: process.env.SENDGRID_FROM_EMAIL!,
-            subject: params.subject || 'Notification',
-            text: params.textContent || params.content,
-            html: params.content,
+            templateId: templateId, // Use dynamic template ID
+            dynamicTemplateData: templateData, // Pass template data
         };
+
+    console.log(`Sending email via SendGrid...`);
         const [response] = await sgMail.send(msg);
+        
+    console.log(`Email sent to ${recipientEmail} via SendGrid template ${templateId}`);
+    console.log(`   SendGrid Message ID: ${response.headers['x-message-id']}`);
+        
         return {
             success: true,
             messageId: response.headers['x-message-id'] || undefined,
-            provider: "Sendgrid",
         };
-    } catch(error: any) {
+    } catch (error: any) {
+    console.error('SendGrid error:', error.response?.body || error.message);
         return {
             success: false,
-            error: error.message,
-            provider:"Sendgrid",
+            error: error.response?.body?.errors?.[0]?.message || error.message,
         };
     }
 }
+
 
 

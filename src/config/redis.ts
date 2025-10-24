@@ -1,7 +1,19 @@
 import Redis from 'redis';
 
 const redisClient = Redis.createClient({
-    url: process.env.REDIS_URL || 'redis://localhost:6379',
+    url: process.env.REDIS_URL || 'redis://localhost:6380',
+    socket: {
+        reconnectStrategy: (retries) => {
+            if (retries > 10) {
+                console.error('Too many Redis reconnection attempts, giving up');
+                return new Error('Redis reconnection limit exceeded');
+            }
+            const delay = Math.min(retries * 100, 3000);
+            console.log(`Redis reconnecting in ${delay}ms (attempt ${retries})`);
+            return delay;
+        },
+        connectTimeout: 10000,
+    },
 });
 
 redisClient.on('error',(err)=>{
@@ -15,6 +27,10 @@ redisClient.on('connect',()=>{
 redisClient.on('reconnecting',()=>{
     console.log('Reconnecting to Redis .. ');
 })
+
+redisClient.on('ready', () => {
+    console.log('Redis client is ready');
+});
 
 export { redisClient };
 
